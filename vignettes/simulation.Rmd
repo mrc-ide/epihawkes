@@ -1,0 +1,62 @@
+---
+title: "Simulating with a Hawkes Process"
+author: "Ettie Unwin"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Simulating with a Hawkes Process}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+The first step of modelling infectious disease outbreaks is to fit out model to
+data.  This vignette fits an exponential kernel with a constant exogenous term to some
+fake data.
+```{r setup}
+# Loads the library
+library(epihawkes)
+
+# Sets the seed
+set.seed(6)
+
+# Initialise
+parameters <- list(alpha = 0.98890929785557,
+                   delta = 0.397745453286915,
+                   A = 0.115697778761387,  
+                   B = 0.0697486787103112,
+                   delay = 12)
+T_max <- 37
+print_level <- 1
+
+# Parameterise kernels
+mu_term <- "linear"
+mu_fn <- mu_linear
+
+N_runs <- 1
+
+events <- hawkes_simulation(events = c(0), kernel = ray_kernel, 
+                            T_max = T_max,
+                            parameters = parameters, mu_fn = mu_fn,
+                            print_level = print_level)
+
+print(sprintf("Number of events: %f", length(events)))
+
+```
+
+We can now plot our events count over time.
+```{r}
+plot_events(events, T_max)
+```
+
+We can also plot the intensity of our kernel over time.
+```{r}
+plot_intensity(events, T_max, kernel = ray_kernel,
+               parameters = parameters, mu_fn = mu_fn)
+```

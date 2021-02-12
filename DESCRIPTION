@@ -1,0 +1,42 @@
+Package: epihawkes
+Title: Hawkes Processes model for outbreak analysis
+Version: 1.0.1
+Authors@R: c(
+    person(given = "Juliette",
+           family = "Unwin",
+           role = c("aut", "cre"),
+           email = "h.unwin@imperial.ac.uk",
+           comment = c(ORCID = "0000-0002-9120-4003")),
+    person(given = "Swapnil",
+           family = "Mishra",
+           role = c("aut"),
+           email = "swapnilmishra.anu@gmail.com",
+           comment = c(ORCID = "0000-0002-8759-5902")),
+               person(given = "Samir",
+           family = "Bhatt",
+           role = c("aut"),
+           email = "s.bhatt@imperial.ac.uk",
+           comment = c(ORCID = "0000-0002-0891-4611"))
+	   )
+Description: This package can be used to model infectious disease outbreaks.
+    There are functions available for both fitting the model parameters to
+    real outbreak data as well as simulating outbreaks from given parameters.
+License: GPL-3 + file LICENSE
+Encoding: UTF-8
+LazyData: true
+Depends: R (>= 3.5.0)
+Imports:
+    ggplot2,
+    pracma,
+    numDeriv,
+    stats,
+    dplyr,
+    optimx
+RoxygenNote: 7.1.1
+Suggests: 
+    knitr,
+    rmarkdown,
+    testthat (>= 2.1.0),
+    maxLik,
+    covr
+VignetteBuilder: knitr

@@ -1,0 +1,91 @@
+---
+title: "Fitting a Hawkes Process model to data"
+author: "Ettie Unwin"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Fitting a Hawkes Process model to data}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+The first step of modelling infectious disease outbreaks is to fit out model to
+data.  This vignette fits an exponential kernel with a constant exogenous term to some
+fake data.
+```{r setup}
+# Loads the library
+library(epihawkes)
+
+# Sets the seed
+set.seed(7)
+
+# Reads in the data
+events <- c(0.000000, 0.771571, 1.943459, 2.180687, 2.961730, 3.142143, 3.264126, 
+            3.882074, 4.070863, 4.638020, 6.455129, 6.513948, 6.821339, 7.118830, 
+            7.198664, 7.295149, 7.427732, 7.506764, 7.602405, 9.277181, 9.991999, 
+            11.001693, 11.440366, 11.597552, 11.632289, 11.928978, 12.092628, 14.132090, 
+            14.470250, 14.883751, 15.232930, 15.338974, 15.468886, 16.004105, 16.548530, 
+            16.812450, 17.112300, 17.192190, 17.351976, 18.006120, 18.756083, 18.784992, 
+            18.793765, 19.164586, 19.845115, 19.964203, 20.249877, 20.252764, 20.505669, 
+            20.602818, 20.831750, 21.329023, 21.514157, 22.620786, 22.645346, 22.837090, 
+            22.842070, 22.968605, 23.443426, 23.548017, 24.122169, 25.025036, 25.391495,
+            25.619554, 25.828938, 26.250953, 26.930555, 26.972437, 27.879009, 27.985530, 
+            28.188698, 28.651840, 29.220820, 29.260527, 29.303743, 29.394977, 29.414058, 
+            29.526079, 30.697359, 31.423442, 31.800919, 32.235318, 32.452782, 33.015572, 
+            33.204953, 33.653366, 33.666331, 33.755347, 33.821274, 33.963403, 33.979010, 
+            34.419668, 34.789652, 34.815162, 35.246372, 35.520808, 35.850336, 36.154111, 
+            36.443678)
+
+# Sets parameters for the exogenous term
+mu_term <- "linear"
+mu_fn <- mu_linear
+mu_diff_fn <- mu_diff_linear
+mu_int_fn <- mu_int_linear
+
+# Prints log level
+print_level <- 1
+
+parameters <- list(alpha = runif(1, 0, 1),
+                   delta = runif(1, 0, 1),
+                   A = runif(1, 0, 1),
+                   B = runif(1, 0, 1))
+  
+output <- optim(par = parameters, fn = neg_log_likelihood, gr = ray_derivatives,
+                method = "BFGS",
+                events = events, 
+                delay = 12,
+                kernel = ray_kernel, 
+                mu_fn = mu_fn, mu_diff_fn = mu_diff_fn,
+                mu_int_fn = mu_int_fn,
+                print_level = print_level)
+
+print(sprintf("neg LL: %f", output$value))
+print(paste(c("Optimal parameters:", output$par)))
+
+```
+
+We can now plot our fitted endogenous kernel
+```{r}
+parameters <- as.list(output$par)
+parameters$delay = 12
+plot_decay_kernel(ray_kernel, parameters = parameters, T_max = 25)
+```
+
+and our time varying exogenouos term.
+
+```{r}
+library(ggplot2)
+ts = 1:max(events)
+ys = mu_fn(ts, parameters = parameters)
+df <- data.frame(ts, ys)
+p <- ggplot(df) + geom_line(aes(ts, ys)) + 
+  ylab(expression(mu)) + xlab('t')
+print(p)
+```
